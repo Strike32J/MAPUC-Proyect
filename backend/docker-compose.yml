@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_DB: mapuc
+      POSTGRES_USER: mapuc
+      POSTGRES_PASSWORD: mapuc
+    ports:
+      - '5432:5432'
+    volumes:
+      - mapuc_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mapuc -d mapuc']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  nats:
+    image: nats:2.10-alpine
+    command: ['-js', '-sd', '/data', '-m', '8222']
+    ports:
+      - '4222:4222'
+      - '8222:8222'
+    volumes:
+      - mapuc_nats_data:/data
+  migraciones:
+    build: .
+    command: ['node', 'dist/scripts/ejecutar-migraciones.js']
+    environment: &entorno_mapuc
+      NODE_ENV: production
+      DATABASE_URL: postgresql://mapuc:mapuc@postgres:5432/mapuc
+      DATABASE_SSL: 'false'
+      DATABASE_POOL_MIN: '2'
+      DATABASE_POOL_MAX: '20'
+      REDIS_URL: redis://redis:6379
+      NATS_SERVERS: nats://nats:4222
+      PORT: '3000'
+      REALTIME_PORT: '3001'
+      PUBLIC_APP_URL: http://localhost:5173
+      CORS_ORIGINS: http://localhost:5173
+      OIDC_ISSUER: https://identity.example.invalid/realms/mapuc
+      OIDC_AUDIENCE: mapuc-api
+      OIDC_CLIENT_ID: mapuc-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+  api:
+    build: .
+    environment: *entorno_mapuc
+    ports:
+      - '3000:3000'
+    depends_on:
+      migraciones:
+        condition: service_completed_successfully
+  realtime:
+    build: .
+    command: ['node', 'dist/apps/realtime/src/main.js']
+    environment: *entorno_mapuc
+    ports:
+      - '3001:3001'
+    depends_on:
+      redis:
+        condition: service_healthy
+      nats:
+        condition: service_started
+  workers:
+    build: .
+    command: ['node', 'dist/apps/workers/src/main.js']
+    environment: *entorno_mapuc
+    depends_on:
+      nats:
+        condition: service_started
+volumes:
+  mapuc_postgres_data:
+  mapuc_nats_data:
