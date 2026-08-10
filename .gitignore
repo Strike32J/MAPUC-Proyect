@@ -44,6 +44,7 @@ Desktop.ini
 *.swp
 *.swo
 *.sw?
+*.tsbuildinfo
 
 # Docker y temporales locales
 *.pid
