@@ -1,0 +1,24 @@
+import { useDeferredValue, useMemo, useState } from 'react'
+import { Accessibility, Layers3, LocateFixed, Search, SlidersHorizontal, X, ZoomIn, ZoomOut } from 'lucide-react'
+import { BotonIcono } from '../../../components/ui/BotonIcono'
+import { EstadoAforo } from '../../../components/ui/EstadoAforo'
+import { metaAforo } from '../../../shared/constants/aforo'
+import { PanelLugar } from '../../lugares'
+import type { Lugar } from '../../../shared/types/lugar'
+import { lugaresDemo } from '../model/lugares-demo'
+
+export function VistaMapa() {
+  const [consulta, setConsulta] = useState('')
+  const [categoria, setCategoria] = useState('Todas')
+  const [soloAccesible, setSoloAccesible] = useState(false)
+  const [panelAbierto, setPanelAbierto] = useState(true)
+  const [seleccionado, setSeleccionado] = useState<Lugar | null>(lugaresDemo[0])
+  const textoDiferido = useDeferredValue(consulta)
+  const resultados = useMemo(() => lugaresDemo.filter((lugar) => (lugar.nombre.toLowerCase().includes(textoDiferido.toLowerCase()) || lugar.categoria.toLowerCase().includes(textoDiferido.toLowerCase())) && (categoria === 'Todas' || lugar.categoria === categoria) && (!soloAccesible || lugar.accesible)), [textoDiferido, categoria, soloAccesible])
+  return <main className="mapa-pagina">
+    <section className="barra-busqueda"><button type="button" className="boton-filtros" onClick={() => setPanelAbierto(!panelAbierto)} aria-label="Mostrar filtros"><SlidersHorizontal size={19} /></button><label className="buscador"><Search size={19} /><span className="sr-only">Buscar lugares</span><input value={consulta} onChange={(event) => setConsulta(event.target.value)} placeholder="Buscar facultades, aulas, áreas verdes y servicios" />{consulta && <button type="button" aria-label="Limpiar búsqueda" onClick={() => setConsulta('')}><X size={17} /></button>}</label><button type="button" className="filtro-ruta" aria-pressed={soloAccesible} onClick={() => setSoloAccesible(!soloAccesible)}><Accessibility size={18} /> Rutas accesibles</button></section>
+    <div className="contenido-mapa"><aside className={`panel-filtros${panelAbierto ? '' : ' cerrado'}`}><div className="cabecera-panel"><div><p className="eyebrow">Explorar campus</p><h1>Lugares y servicios</h1></div><button type="button" onClick={() => { setCategoria('Todas'); setSoloAccesible(false) }}>Limpiar</button></div><fieldset><legend>Categorías</legend><div className="chips">{['Todas', 'Bibliotecas', 'Comedores', 'Aulas', 'Áreas verdes'].map((item) => <button type="button" key={item} className={categoria === item ? 'seleccionado' : ''} onClick={() => setCategoria(item)}>{item}</button>)}</div></fieldset><fieldset><legend>Aforo</legend>{Object.entries(metaAforo).map(([nivel, meta]) => <label className="opcion-filtro" key={nivel}><input type="checkbox" /> <span className={`punto ${meta.clase}`} /> {meta.texto}</label>)}</fieldset><label className="opcion-filtro"><input type="checkbox" checked={soloAccesible} onChange={() => setSoloAccesible(!soloAccesible)} /><Accessibility size={16} /> Mostrar accesibles</label><p className="contador-resultados">{resultados.length} lugares encontrados</p><div className="lista-lugares">{resultados.map((lugar) => <button type="button" key={lugar.id} className={seleccionado?.id === lugar.id ? 'lugar-lista seleccionado' : 'lugar-lista'} onClick={() => setSeleccionado(lugar)}><div><b>{lugar.nombre}</b><span>{lugar.categoria} · {lugar.minutos} min</span></div><EstadoAforo nivel={lugar.aforo} /></button>)}</div></aside>
+      <section className="lienzo-mapa" aria-label="Mapa ilustrativo del campus PUCP"><div className="reticula" /><div className="camino camino-uno" /><div className="camino camino-dos" /><div className="zona-verde verde-uno" /><div className="zona-verde verde-dos" />{['Pabellón A', 'Pabellón C', 'Biblioteca', 'Comedor', 'Pabellón H', 'Rectorado'].map((nombre, indice) => <div className={`edificio edificio-${indice + 1}`} key={nombre}>{nombre}</div>)}{resultados.map((lugar) => <button type="button" key={lugar.id} className={`marcador ${seleccionado?.id === lugar.id ? 'marcador-seleccionado' : ''}`} style={lugar.posicion} onClick={() => setSeleccionado(lugar)} aria-label={`Ver ${lugar.nombre}, ${metaAforo[lugar.aforo].texto}`}><span className={metaAforo[lugar.aforo].clase} /><b>{lugar.nombre}</b></button>)}<div className="controles-mapa"><BotonIcono etiqueta="Acercar"><ZoomIn size={19} /></BotonIcono><BotonIcono etiqueta="Alejar"><ZoomOut size={19} /></BotonIcono><BotonIcono etiqueta="Centrar ubicación"><LocateFixed size={19} /></BotonIcono><BotonIcono etiqueta="Capas"><Layers3 size={19} /></BotonIcono></div><div className="leyenda-mapa"><b>Aforo actualizado</b><span>Datos de demostración · hace 2 min</span></div></section>
+      {seleccionado && <PanelLugar lugar={seleccionado} cerrar={() => setSeleccionado(null)} />}</div>
+  </main>
+}

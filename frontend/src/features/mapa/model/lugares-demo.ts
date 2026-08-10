@@ -1,0 +1,10 @@
+import type { Lugar } from '../../../shared/types/lugar'
+
+export const lugaresDemo: Lugar[] = [
+  { id: 'biblioteca', nombre: 'Biblioteca Central', categoria: 'Bibliotecas', aforo: 'medio', actual: 238, capacidad: 450, minutos: 6, accesible: true, edificio: 'Edificio Biblioteca Central', horario: 'Lun-Vie 7:30-21:00', descripcion: 'Salas de lectura, cubículos de estudio, préstamo de libros y acceso a recursos académicos.', posicion: { left: '42%', top: '42%' } },
+  { id: 'comedor', nombre: 'Comedor Central', categoria: 'Comedores', aforo: 'alto', actual: 498, capacidad: 600, minutos: 4, accesible: true, edificio: 'Edificio Comedor Central', horario: 'Lun-Vie 7:00-20:00', descripcion: 'Menús balanceados y líneas de atención rápida para la comunidad PUCP.', posicion: { left: '54%', top: '68%' } },
+  { id: 'pabellon-a', nombre: 'Pabellón A', categoria: 'Aulas', aforo: 'bajo', actual: 145, capacidad: 800, minutos: 3, accesible: true, edificio: 'Pabellón A', horario: 'Lun-Vie 7:00-22:00', descripcion: 'Aulas, seminarios y talleres multidisciplinarios.', posicion: { left: '28%', top: '30%' } },
+  { id: 'pabellon-h', nombre: 'Pabellón H - Ingeniería', categoria: 'Aulas', aforo: 'medio', actual: 423, capacidad: 1000, minutos: 7, accesible: true, edificio: 'Pabellón H', horario: 'Lun-Vie 7:00-22:00', descripcion: 'Laboratorios de electrónica, mecatrónica, computación y química.', posicion: { left: '75%', top: '38%' } },
+  { id: 'cafeteria', nombre: 'Cafetería Central', categoria: 'Comedores', aforo: 'lleno', actual: 124, capacidad: 120, minutos: 2, accesible: true, edificio: 'Edificio Cafetería', horario: 'Lun-Vie 7:00-20:30', descripcion: 'Cafetería con snacks, bebidas y opciones rápidas.', posicion: { left: '33%', top: '70%' } },
+  { id: 'jardines', nombre: 'Jardines Internos', categoria: 'Áreas verdes', aforo: 'bajo', actual: 45, capacidad: 200, minutos: 3, accesible: true, edificio: 'Zona central', horario: 'Todos los días 6:00-22:00', descripcion: 'Zonas de descanso y estudio al aire libre.', posicion: { left: '58%', top: '52%' } },
+]
